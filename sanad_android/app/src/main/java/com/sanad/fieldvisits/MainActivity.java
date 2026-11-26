@@ -59,6 +59,31 @@ public class MainActivity extends Activity {
             });
         }
 
+
+        @JavascriptInterface public void saveImage(String name, String mime, String base64) {
+            runOnUiThread(() -> {
+                try {
+                    byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+                    ContentValues values = new ContentValues();
+                    values.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+                    values.put(MediaStore.Images.Media.MIME_TYPE, mime);
+                    values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Sanad");
+                    values.put(MediaStore.Images.Media.IS_PENDING, 1);
+                    Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                    if (uri == null) throw new Exception("تعذر إنشاء الصورة");
+                    OutputStream out = getContentResolver().openOutputStream(uri);
+                    if (out == null) throw new Exception("تعذر حفظ الصورة");
+                    out.write(bytes); out.close();
+                    ContentValues done = new ContentValues();
+                    done.put(MediaStore.Images.Media.IS_PENDING, 0);
+                    getContentResolver().update(uri, done, null, null);
+                    Toast.makeText(MainActivity.this, "تم حفظ الصورة في الاستديو / Pictures/Sanad", Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "تعذر حفظ الصورة: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
         @JavascriptInterface public void saveFile(String name, String mime, String base64) {
             runOnUiThread(() -> {
                 try {
