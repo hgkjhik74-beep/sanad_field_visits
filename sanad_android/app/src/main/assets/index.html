@@ -61,6 +61,22 @@ button:hover{filter:brightness(1.08)}button.secondary{background:#eeeaf5;color:v
 .full-table{min-width:1700px}.full-table th,.full-table td{font-size:11px;padding:8px 7px}
 .data-section{margin:16px 0}.data-section h3{color:var(--purple);font-size:15px;margin:0 0 10px}
 .report-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.pro-report-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 18px}
+.pro-report-head h2{margin:0;color:#39205f}.report-sub{color:var(--muted);font-size:12px;margin-top:5px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.kpi{background:linear-gradient(145deg,#fff,#f8f5fc);border:1px solid #e9e2f3;border-radius:15px;padding:16px}
+.kpi span{font-size:12px;color:var(--muted)}.kpi strong{display:block;font-size:27px;color:#56358c;margin-top:8px}.kpi small{display:block;color:#18865b;font-size:11px;margin-top:5px}
+.chart-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}
+.chart-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0;box-shadow:0 4px 18px #25164408}
+.chart-card h3{margin:0 0 14px;font-size:14px;color:#39205f}
+.donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.donut{width:140px;height:140px;border-radius:50%;position:relative;flex:none}.donut:after{content:"";position:absolute;inset:26px;border-radius:50%;background:white}
+.donut-center{position:absolute;z-index:1;inset:0;display:grid;place-content:center;text-align:center;font-weight:bold;color:#39205f;font-size:21px}.donut-center small{font-size:10px;color:var(--muted);font-weight:normal}
+.legend{display:grid;gap:9px;flex:1;min-width:130px}.legend-row{display:flex;align-items:center;gap:7px;font-size:12px}.legend-dot{width:9px;height:9px;border-radius:3px;flex:none}
+.metric-list{display:grid;gap:11px}.metric-row{display:grid;grid-template-columns:minmax(90px,1fr) 2fr 35px;gap:8px;align-items:center;font-size:12px}.metric-track{height:11px;border-radius:20px;background:#f0edf5;overflow:hidden}.metric-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#56358c,#a88bd1)}
+.insight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}.insight{padding:14px;border-radius:13px;background:#f7f5fa;border:1px solid #ebe6f2}.insight b{display:block;color:#56358c;font-size:18px;margin-bottom:5px}.insight span{font-size:11px;color:var(--muted)}
+.photo-cell{display:flex;gap:5px;align-items:center;white-space:nowrap}.photo-thumb{width:38px;height:38px;object-fit:cover;border-radius:7px;border:1px solid var(--line);cursor:pointer}.photo-modal{position:fixed;inset:0;background:#120d1dcc;z-index:10;display:none;align-items:center;justify-content:center;padding:18px}.photo-modal.show{display:flex}.photo-modal img{max-width:95vw;max-height:78vh;border-radius:12px}.photo-tools{display:flex;gap:8px;justify-content:center;margin-top:10px}.share-btn{background:#128c7e}.photo-btn{background:#eeeaf5;color:#56358c}
+@media(max-width:760px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.chart-layout{grid-template-columns:1fr}.insight-grid{grid-template-columns:1fr 1fr}}
+@media print{.kpi-grid{grid-template-columns:repeat(4,1fr)}.chart-layout{grid-template-columns:repeat(2,1fr)}.chart-card,.kpi,.insight{break-inside:avoid}.donut,.metric-fill{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @media(max-width:760px){.report-grid{grid-template-columns:1fr 1fr}.bottom-nav button{font-size:11px}}
 @media(max-width:460px){.report-grid{grid-template-columns:1fr}.bottom-nav{gap:2px}.bottom-nav button{font-size:10px;padding:8px 2px}}
 @media print{
@@ -98,11 +114,11 @@ button:hover{filter:brightness(1.08)}button.secondary{background:#eeeaf5;color:v
    <select id="filterInterest" onchange="render()"><option value="">كل حالات الاهتمام</option><option>مهتم جداً</option><option>مهتم</option><option>يحتاج إلى شرح أكثر</option><option>غير مهتم حالياً</option><option>غير مهتم</option></select>
    <select id="filterSystem" onchange="render()"><option value="">وجود نظام: الكل</option><option>نعم</option><option>لا</option></select>
    <button class="secondary" onclick="exportCSV()">تصدير Excel</button><button class="secondary" onclick="exportPDF()">تصدير PDF</button>
-   <button class="secondary" onclick="backupJSON()">نسخة احتياطية</button><button class="secondary" onclick="$('importFile').click()">استيراد نسخة</button>
+   <button class="secondary share-btn" onclick="shareAllWhatsApp()">إرسال ملخص واتساب</button><button class="secondary" onclick="backupJSON()">نسخة احتياطية</button><button class="secondary" onclick="$('importFile').click()">استيراد نسخة</button>
    <input type="file" id="importFile" accept=".json,application/json" hidden onchange="importJSON(event)">
   </div>
   <section class="panel">
-   <div class="table-wrap"><table class="table"><thead><tr><th>اسم المحل</th><th>رقم الجوال</th><th>النشاط</th><th>المنطقة</th><th>النظام الحالي</th><th>الاهتمام</th><th class="no-print">الإجراءات</th></tr></thead><tbody id="rows"></tbody></table></div>
+   <div class="table-wrap"><table class="table"><thead><tr><th>الصورة</th><th>اسم المحل</th><th>رقم الجوال</th><th>النشاط</th><th>المنطقة</th><th>النظام الحالي</th><th>الاهتمام</th><th class="no-print">الإجراءات</th></tr></thead><tbody id="rows"></tbody></table></div>
    <div id="empty" class="empty">لا توجد زيارات مسجلة حتى الآن.</div>
   </section>
  </section>
@@ -116,6 +132,7 @@ button:hover{filter:brightness(1.08)}button.secondary{background:#eeeaf5;color:v
  </section>
  <p class="notice no-print">يتم حفظ البيانات تلقائياً على هذا الجهاز. استخدم النسخة الاحتياطية بشكل دوري.</p>
 </main>
+<div class="photo-modal" id="photoModal" onclick="if(event.target===this)closePhoto()"><div><img id="photoPreview" alt="صورة الزيارة"><div class="photo-tools"><button onclick="downloadCurrentPhoto()">تنزيل الصورة</button><button class="secondary" onclick="closePhoto()">إغلاق</button></div></div></div>
 <nav class="bottom-nav no-print">
  <button class="active" data-view="homeView" onclick="navigate('homeView')">الرئيسية</button>
  <button data-view="visitsView" onclick="navigate('visitsView')">الزيارات</button>
@@ -182,7 +199,12 @@ function saveVisit(e){e.preventDefault();const id=$('recordId').value;const v={i
 function removeVisit(id){const v=visits.find(x=>x.id===id);if(v&&confirm('هل أنت متأكد من حذف زيارة '+v.shop+'؟ لا يمكن التراجع عن الحذف.')){visits=visits.filter(x=>x.id!==id);persist()}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function tag(v){let c=v==='مهتم جداً'?'hot':v==='مهتم'?'warm':v==='يحتاج إلى شرح أكثر'?'maybe':'cold';return `<span class="pill ${c}">${esc(v||'غير محدد')}</span>`}
-function render(){const q=$('search').value.trim().toLowerCase(),fi=$('filterInterest').value,fs=$('filterSystem').value;const list=visits.filter(v=>(!q||[v.shop,v.phone,v.area,v.governorate,v.systemName].join(' ').toLowerCase().includes(q))&&(!fi||v.interest===fi)&&(!fs||v.hasSystem===fs));$('rows').innerHTML=list.map(v=>`<tr><td><b>${esc(v.shop)}</b><br><small>${esc(v.contact)}</small></td><td>${esc(v.phone)}</td><td>${esc(v.business)}</td><td>${esc(v.area||v.governorate)}</td><td>${v.hasSystem==='نعم'?esc(v.systemName||'نعم'):'لا يوجد'}</td><td>${tag(v.interest)}</td><td><div class="actions"><button class="small secondary" onclick="openForm('${v.id}')">تعديل</button><button class="small danger" onclick="removeVisit('${v.id}')">حذف</button></div></td></tr>`).join('');$('empty').style.display=list.length?'none':'block';$('total').textContent=visits.length;$('interested').textContent=visits.filter(v=>['مهتم جداً','مهتم'].includes(v.interest)).length;$('hot').textContent=visits.filter(v=>v.status==='عميل جاهز للاشتراك'||v.status==='عميل ساخن').length;$('without').textContent=visits.filter(v=>v.hasSystem==='لا').length}
+function render(){
+ const q=$('search').value.trim().toLowerCase(),fi=$('filterInterest').value,fs=$('filterSystem').value;
+ const list=visits.filter(v=>(!q||[v.shop,v.phone,v.area,v.governorate,v.systemName].join(' ').toLowerCase().includes(q))&&(!fi||v.interest===fi)&&(!fs||v.hasSystem===fs));
+ $('rows').innerHTML=list.map(v=>'<tr><td><div class="photo-cell">'+(v.photoData?'<img class="photo-thumb" src="'+v.photoData+'" onclick="viewPhoto(\''+v.id+'\')">':'')+'<button class="small photo-btn" onclick="document.getElementById(\'photoInput_'+v.id+'\').click()">📷</button><input id="photoInput_'+v.id+'" type="file" accept="image/*" capture="environment" hidden onchange="capturePhoto(\''+v.id+'\',this)">'+(v.photoData?'<button class="small secondary" onclick="savePhotoToGallery(\''+v.id+'\')">حفظ</button>':'')+'</div></td><td><b>'+esc(v.shop)+'</b><br><small>'+esc(v.contact)+'</small></td><td>'+esc(v.phone)+'</td><td>'+esc(v.business)+'</td><td>'+esc(v.area||v.governorate)+'</td><td>'+(v.hasSystem==='نعم'?esc(v.systemName||'نعم'):'لا يوجد')+'</td><td>'+tag(v.interest)+'</td><td><div class="actions"><button class="small secondary" onclick="openForm(\''+v.id+'\')">تعديل</button><button class="small share-btn" onclick="shareVisitWhatsApp(\''+v.id+'\')">واتساب</button><button class="small danger" onclick="removeVisit(\''+v.id+'\')">حذف</button></div></td></tr>').join('');
+ $('empty').style.display=list.length?'none':'block';$('total').textContent=visits.length;$('interested').textContent=visits.filter(v=>['مهتم جداً','مهتم'].includes(v.interest)).length;$('hot').textContent=visits.filter(v=>v.status==='عميل جاهز للاشتراك'||v.status==='عميل ساخن').length;$('without').textContent=visits.filter(v=>v.hasSystem==='لا').length
+}
 const fieldLabels=['اسم المنشأة','اسم المسؤول','رقم الجوال','رقم الواتساب','المحافظة','المنطقة / الحي','العنوان','رابط الخرائط','نوع النشاط','عدد الفروع','طبيعة النشاط','يستخدم نظاماً؟','اسم النظام','مدى الرضا','المشاكل الحالية','مدى الاهتمام','الخدمة المطلوبة','نسخة تجريبية','الاحتياج','حالة العميل','موعد المتابعة','اسم المندوب','ملاحظات'];
 function buildReportHTML(){
  const total=visits.length, interested=visits.filter(v=>['مهتم جداً','مهتم'].includes(v.interest)).length, ready=visits.filter(v=>v.status==='عميل جاهز للاشتراك'||v.interest==='مهتم جداً').length, noSystem=visits.filter(v=>v.hasSystem==='لا').length;
@@ -214,6 +236,15 @@ function exportPDF(){
  if(window.AndroidFiles&&AndroidFiles.printPdf){AndroidFiles.printPdf();return}
  window.print();
 }
+
+function shareVisitWhatsApp(id){const v=visits.find(x=>x.id===id);if(!v)return;const msg=['*تقرير زيارة ميدانية - سند*','المنشأة: '+v.shop,'المسؤول: '+(v.contact||'-'),'الجوال: '+(v.phone||'-'),'النشاط: '+(v.business||'-'),'الموقع: '+[v.governorate,v.area,v.address].filter(Boolean).join(' - '),'الاهتمام: '+(v.interest||'-'),'حالة العميل: '+(v.status||'-'),'الخدمة: '+(v.service||'-'),'المتابعة: '+(v.followDate||'-'),'المندوب: '+(v.agent||'-'),'الملاحظات: '+(v.notes||'-')].join('\n');const phone=(v.whatsapp||v.phone||'').replace(/[^0-9]/g,'');window.location.href='https://wa.me/'+phone+'?text='+encodeURIComponent(msg)}
+function shareAllWhatsApp(){if(!visits.length){alert('لا توجد بيانات لإرسالها');return}const interested=visits.filter(v=>['مهتم جداً','مهتم'].includes(v.interest)).length,ready=visits.filter(v=>v.status==='عميل جاهز للاشتراك'||v.interest==='مهتم جداً').length;const msg=['*تقرير سند الميداني*','التاريخ: '+new Date().toLocaleDateString('ar'),'إجمالي الزيارات: '+visits.length,'المهتمون: '+interested,'الجاهزون للاشتراك: '+ready,'','*تفاصيل الزيارات*',...visits.slice(0,35).map((v,i)=>(i+1)+'. '+v.shop+' | '+(v.phone||'-')+' | '+(v.interest||'-')+' | '+(v.area||'-'))];if(visits.length>35)msg.push('هناك '+(visits.length-35)+' سجلاً إضافياً داخل التطبيق');window.location.href='https://wa.me/?text='+encodeURIComponent(msg.join('\n'))}
+function capturePhoto(id,input){const file=input.files&&input.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('يرجى اختيار صورة');return}const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const max=1600,scale=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);const data=canvas.toDataURL('image/jpeg',0.78),v=visits.find(x=>x.id===id);if(v){v.photoData=data;persist();alert('تم حفظ الصورة مع الزيارة على الجهاز')}input.value=''};img.onerror=()=>alert('تعذر قراءة الصورة');img.src=reader.result};reader.readAsDataURL(file)}
+function viewPhoto(id){const v=visits.find(x=>x.id===id);if(!v||!v.photoData)return;currentPhotoId=id;$('photoPreview').src=v.photoData;$('photoModal').classList.add('show')}
+function closePhoto(){$('photoModal').classList.remove('show')}
+function downloadCurrentPhoto(){if(currentPhotoId)savePhotoToGallery(currentPhotoId)}
+function savePhotoToGallery(id){const v=visits.find(x=>x.id===id);if(!v||!v.photoData)return;const base64=v.photoData.split(',')[1],filename='Sanad_'+String(v.shop||'Visit').replace(/[^\u0600-\u06FF\w-]/g,'_')+'_'+id+'.jpg';if(window.AndroidFiles&&AndroidFiles.saveImage){AndroidFiles.saveImage(filename,'image/jpeg',base64);return}const a=document.createElement('a');a.href=v.photoData;a.download=filename;a.click()}
+
 function backupJSON(){download(new Blob([JSON.stringify(visits,null,2)],{type:'application/json'}),'sanad_visits_backup.json')}
 function download(blob,name){if(window.AndroidFiles&&window.AndroidFiles.saveFile){const r=new FileReader();r.onload=()=>{const b64=String(r.result).split(',')[1];AndroidFiles.saveFile(name,blob.type||'application/octet-stream',b64)};r.readAsDataURL(blob);return}const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 function importJSON(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data))throw 0;if(confirm('سيتم استبدال السجلات الحالية بالنسخة المستوردة. هل تريد المتابعة؟')){visits=data;persist();alert('تم استيراد النسخة بنجاح')}}catch(_){alert('ملف النسخة الاحتياطية غير صالح')}e.target.value=''};r.readAsText(file)}
