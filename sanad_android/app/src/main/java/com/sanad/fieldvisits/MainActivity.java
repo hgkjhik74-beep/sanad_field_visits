@@ -1,6 +1,8 @@
 package com.sanad.fieldvisits;
 
 import android.app.Activity;
+import androidx.core.content.FileProvider;
+import java.io.File;
 import android.os.Bundle;
 import android.webkit.*;
 import android.content.Intent;
@@ -18,6 +20,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_REQUEST = 1001;
+    private Uri cameraUri;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -34,10 +37,25 @@ public class MainActivity extends Activity {
             @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
                 if (fileCallback != null) fileCallback.onReceiveValue(null);
                 fileCallback = callback;
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/json");
-                startActivityForResult(Intent.createChooser(intent, "اختر النسخة الاحتياطية"), FILE_REQUEST);
+                boolean wantsImage = false;
+                for (String type : params.getAcceptTypes()) {
+                    if (type != null && type.toLowerCase().contains("image")) wantsImage = true;
+                }
+                Intent picker = new Intent(Intent.ACTION_GET_CONTENT);
+                picker.addCategory(Intent.CATEGORY_OPENABLE);
+                picker.setType(wantsImage ? "image/*" : "application/json");
+                Intent chooser = Intent.createChooser(picker, wantsImage ? "التقاط أو اختيار صورة" : "اختر النسخة الاحتياطية");
+                if (wantsImage) {
+                    try {
+                        File photo = new File(getCacheDir(), "sanad_camera_" + System.currentTimeMillis() + ".jpg");
+                        cameraUri = FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".fileprovider", photo);
+                        Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        camera.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
+                        camera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
+                    } catch (Exception ignored) { cameraUri = null; }
+                }
+                startActivityForResult(chooser, FILE_REQUEST);
                 return true;
             }
         });
@@ -45,6 +63,18 @@ public class MainActivity extends Activity {
     }
 
     private class FileBridge {
+
+        @JavascriptInterface public void openWhatsApp(String url) {
+            runOnUiThread(() -> {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "تعذر فتح واتساب", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
         @JavascriptInterface public void printPdf() {
             runOnUiThread(() -> {
                 try {
@@ -108,8 +138,13 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_REQUEST && fileCallback != null) {
-            Uri[] result = (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) ? new Uri[]{data.getData()} : null;
-            fileCallback.onReceiveValue(result); fileCallback = null;
+            Uri selected = null;
+            if (resultCode == Activity.RESULT_OK) {
+                if (data != null && data.getData() != null) selected = data.getData();
+                else if (cameraUri != null) selected = cameraUri;
+            }
+            Uri[] result = selected != null ? new Uri[]{selected} : null;
+            fileCallback.onReceiveValue(result); fileCallback = null; cameraUri = null;
         }
     }
 
