@@ -133,9 +133,20 @@ function removeVisit(id){const v=visits.find(x=>x.id===id);if(v&&confirm('هل �
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function tag(v){let c=v==='مهتم جداً'?'hot':v==='مهتم'?'warm':v==='يحتاج إلى شرح أكثر'?'maybe':'cold';return `<span class="pill ${c}">${esc(v||'غير محدد')}</span>`}
 function render(){const q=$('search').value.trim().toLowerCase(),fi=$('filterInterest').value,fs=$('filterSystem').value;const list=visits.filter(v=>(!q||[v.shop,v.phone,v.area,v.governorate,v.systemName].join(' ').toLowerCase().includes(q))&&(!fi||v.interest===fi)&&(!fs||v.hasSystem===fs));$('rows').innerHTML=list.map(v=>`<tr><td><b>${esc(v.shop)}</b><br><small>${esc(v.contact)}</small></td><td>${esc(v.phone)}</td><td>${esc(v.business)}</td><td>${esc(v.area||v.governorate)}</td><td>${v.hasSystem==='نعم'?esc(v.systemName||'نعم'):'لا يوجد'}</td><td>${tag(v.interest)}</td><td><div class="actions"><button class="small secondary" onclick="openForm('${v.id}')">تعديل</button><button class="small danger" onclick="removeVisit('${v.id}')">حذف</button></div></td></tr>`).join('');$('empty').style.display=list.length?'none':'block';$('total').textContent=visits.length;$('interested').textContent=visits.filter(v=>['مهتم جداً','مهتم'].includes(v.interest)).length;$('hot').textContent=visits.filter(v=>v.status==='عميل جاهز للاشتراك'||v.status==='عميل ساخن').length;$('without').textContent=visits.filter(v=>v.hasSystem==='لا').length}
-function csvCell(x){return '"'+String(x??'').replace(/"/g,'""')+'"'}
-function exportCSV(){if(!visits.length){alert('لا توجد بيانات لتصديرها');return}const labels=['اسم المحل','المسؤول','الجوال','واتساب','المحافظة','المنطقة','العنوان','رابط الموقع','النشاط','الفروع','طبيعة النشاط','لديه نظام؟','اسم النظام','الرضا','المشاكل الحالية','الاهتمام','الخدمة','نسخة تجريبية','الاحتياج','حالة العميل','موعد المتابعة','المندوب','ملاحظات'];const keys=fields;const rows=[labels,...visits.map(v=>keys.map(k=>v[k]||''))];const csv='\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n');download(new Blob([csv],{type:'text/csv;charset=utf-8'}),'sanad_field_visits.csv')}
-function exportPDF(){if(!visits.length){alert('لا توجد بيانات لتصديرها');return}window.print()}
+function exportCSV(){
+ if(!visits.length){alert('لا توجد بيانات لتصديرها');return}
+ const labels=['اسم المحل','المسؤول','الجوال','واتساب','المحافظة','المنطقة','العنوان','رابط الموقع','النشاط','الفروع','طبيعة النشاط','لديه نظام؟','اسم النظام','الرضا','المشاكل الحالية','الاهتمام','الخدمة','نسخة تجريبية','الاحتياج','حالة العميل','موعد المتابعة','المندوب','ملاحظات'];
+ const cell=x=>'<td style="border:1px solid #b8b1c7;padding:8px;mso-number-format:\'\\@\';">'+esc(x||'')+'</td>';
+ const head='<tr>'+labels.map(x=>'<th style="background:#56358c;color:white;border:1px solid #b8b1c7;padding:9px;">'+esc(x)+'</th>').join('')+'</tr>';
+ const body=visits.map((v,i)=>'<tr style="background:'+(i%2?'#f3f0f8':'white')+'">'+fields.map(k=>cell(v[k])).join('')+'</tr>').join('');
+ const doc='\uFEFF<html><head><meta charset="UTF-8"></head><body dir="rtl"><table style="border-collapse:collapse;font-family:Tahoma,Arial;font-size:11pt"><caption style="font-size:16pt;font-weight:bold;padding:12px">سجل الزيارات الميدانية - سند</caption><thead>'+head+'</thead><tbody>'+body+'</tbody></table></body></html>';
+ download(new Blob([doc],{type:'application/vnd.ms-excel;charset=utf-8'}),'sanad_field_visits.xls');
+}
+function exportPDF(){
+ if(!visits.length){alert('لا توجد بيانات لتصديرها');return}
+ if(window.AndroidFiles&&AndroidFiles.printPdf){AndroidFiles.printPdf();return}
+ window.print();
+}
 function backupJSON(){download(new Blob([JSON.stringify(visits,null,2)],{type:'application/json'}),'sanad_visits_backup.json')}
 function download(blob,name){if(window.AndroidFiles&&window.AndroidFiles.saveFile){const r=new FileReader();r.onload=()=>{const b64=String(r.result).split(',')[1];AndroidFiles.saveFile(name,blob.type||'application/octet-stream',b64)};r.readAsDataURL(blob);return}const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 function importJSON(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(!Array.isArray(data))throw 0;if(confirm('سيتم استبدال السجلات الحالية بالنسخة المستوردة. هل تريد المتابعة؟')){visits=data;persist();alert('تم استيراد النسخة بنجاح')}}catch(_){alert('ملف النسخة الاحتياطية غير صالح')}e.target.value=''};r.readAsText(file)}

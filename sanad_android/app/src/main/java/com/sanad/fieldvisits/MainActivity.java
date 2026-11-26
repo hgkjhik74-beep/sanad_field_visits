@@ -10,6 +10,8 @@ import android.provider.MediaStore;
 import android.os.Environment;
 import android.widget.Toast;
 import android.util.Base64;
+import android.print.PrintManager;
+import android.print.PrintAttributes;
 import java.io.OutputStream;
 
 public class MainActivity extends Activity {
@@ -43,6 +45,20 @@ public class MainActivity extends Activity {
     }
 
     private class FileBridge {
+        @JavascriptInterface public void printPdf() {
+            runOnUiThread(() -> {
+                try {
+                    PrintManager manager = (PrintManager) getSystemService(PRINT_SERVICE);
+                    if (manager == null) throw new Exception("خدمة الطباعة غير متاحة");
+                    manager.print("سند - الزيارات الميدانية",
+                        webView.createPrintDocumentAdapter("Sanad-Field-Visits"),
+                        new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "تعذر تشغيل تصدير PDF: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
         @JavascriptInterface public void saveFile(String name, String mime, String base64) {
             runOnUiThread(() -> {
                 try {
