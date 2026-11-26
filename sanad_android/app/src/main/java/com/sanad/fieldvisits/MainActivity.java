@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
                         Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         camera.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri);
                         camera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        camera.setClipData(android.content.ClipData.newRawUri("Sanad photo", cameraUri));
                         chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{camera});
                     } catch (Exception ignored) { cameraUri = null; }
                 }
